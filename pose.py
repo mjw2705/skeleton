@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import mediapipe as mp
 import time
 
@@ -14,14 +15,12 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_h)
 cap.set(cv2.CAP_PROP_FPS, 30)
 
 fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-out = cv2.VideoWriter('hand.avi', fourcc, 30, (frame_w, frame_h))
+out = cv2.VideoWriter('body.avi', fourcc, 30, (frame_w, frame_h))
 
-mp_hands = mp.solutions.hands
+mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
-hand = mp_hands.Hands(static_image_mode=False,
-                      max_num_hands=2,
-                      min_detection_confidence=0.5,
-                      min_tracking_confidence=0.5)
+pose = mp_pose.Pose(min_detection_confidence=0.5,
+                    min_tracking_confidence=0.5)
 
 while cap.isOpened():
     success, image = cap.read()
@@ -33,19 +32,16 @@ while cap.isOpened():
 
     image.flags.writeable = False
     rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = hand.process(rgb)
+    results = pose.process(rgb)
     image.flags.writeable = True
 
-    if results.multi_hand_landmarks:  # 손이 인식되면 true
-        for hand_landmarks in results.multi_hand_landmarks:
-            mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+    mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
     ctime = time.time()
-    fps = 1/(ctime-ptime)
+    fps = 1 / (ctime - ptime)
     ptime = ctime
 
     cv2.putText(image, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_TRIPLEX, 2, (255, 0, 0), 2)
-
     out.write(image)
     cv2.imshow('image', image)
 
