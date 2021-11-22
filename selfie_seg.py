@@ -4,8 +4,8 @@ import mediapipe as mp
 import time
 
 
-frame_w = 1920
-frame_h = 1080
+frame_w = 640
+frame_h = 480
 ptime = 0
 ctime = 0
 
@@ -22,8 +22,8 @@ mp_drawing = mp.solutions.drawing_utils
 mp_selfie_segmentation = mp.solutions.selfie_segmentation
 selfie = mp_selfie_segmentation.SelfieSegmentation(model_selection=1)
 
-BG_COLOR = (192, 192, 192) # gray
-bg_image = None
+BG_COLOR = (0, 0, 0)
+bg_image = True
 
 while cap.isOpened():
     success, image = cap.read()
@@ -41,14 +41,14 @@ while cap.isOpened():
     condition = np.stack((results.segmentation_mask,) * 3, axis=-1) > 0.1
 
     if bg_image is None:
-        bg_image = np.zeros(image.shape, dtype=np.uint8)
-        bg_image[:] = BG_COLOR
+        bg_images = np.zeros(image.shape, dtype=np.uint8)
+        bg_images[:] = BG_COLOR
     else:
-        bg_image = cv2.GaussianBlur(image, (55, 55), 0)
-        # bg_image = cv2.imread('./ex3.jpg')
-        # bg_image = cv2.resize(bg_image, (1920, 1080))
+        bg_images = cv2.GaussianBlur(image, (55, 55), 0)
+        # bg_images = cv2.imread('./ex3.jpg')
+        # bg_images = cv2.resize(bg_image, (frame_w, frame_h))
 
-    output_image = np.where(condition, image, bg_image)
+    output_image = np.where(condition, image, bg_images)
 
     ctime = time.time()
     fps = 1 / (ctime - ptime)
