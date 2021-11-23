@@ -25,5 +25,5 @@
 
 [hand_video](https://github.com/mjw2705/skeleton/blob/master/hand_video.py)   
 
-<img src="/image/hand_video.gif"  width="400" height="300">
+<img src="/image/hand_video.gif"  width="600" height="300">
 
