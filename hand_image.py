@@ -25,36 +25,30 @@ def hands(image):
 
 
 def main():
-    # frame_w = 640
-    # frame_h = 480
+    frame_w = 512
+    frame_h = 512
     ptime = 0
-
 
     # 사진
     cap_image = cv2.imread('dog.png')
-    frame_h, frame_w, _ = cap_image.shape
-
+    img_copy = cap_image.copy()
 
     # 웹캠
     cap_cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    # cap_cam.set(cv2.CAP_PROP_FRAME_WIDTH, frame_w)
-    # cap_cam.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_h)
+    cap_cam.set(cv2.CAP_PROP_FRAME_WIDTH, frame_w)
+    cap_cam.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_h)
     cap_cam.set(cv2.CAP_PROP_FPS, 30)
-
-
-    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    out = cv2.VideoWriter('hand_video.avi', fourcc, 30, (frame_w, frame_h))
 
     while cap_cam.isOpened():
         success, image = cap_cam.read()
+        image = cv2.resize(image, (frame_w, frame_h))
         image = cv2.flip(image, 1)
-        image = cv2.resize(image, (frame_w, frame_h), cv2.INTER_AREA)
 
         if not success:
             print("Ignoring empty camera frame.")
             continue
 
-        backboard = np.zeros((frame_h, frame_w * 2, 3), np.uint8)
+        backboard = np.zeros((frame_h * 2, frame_w * 3, 3), np.uint8)
 
         hand_lms = hands(image)
 
@@ -66,9 +60,10 @@ def main():
             length = math.hypot(abs_x2 - abs_x1, abs_y2 - abs_y1)
 
             # hand range 10 ~ 120
-            Per = np.interp(length, [10, 120], [0.1, 1])
-            print(Per)
-            cap_image = cv2.resize(cap_image, (int(frame_w * Per), int(frame_h * Per)), cv2.INTER_AREA)
+            Per = np.interp(length, [10, 120], [0.1, 2])
+            re_img = cv2.resize(cap_image, (int(frame_w * Per), int(frame_h * Per)), cv2.INTER_AREA)
+        else:
+            re_img = img_copy
 
         ctime = time.time()
         fps = 1 / (ctime - ptime)
@@ -83,19 +78,19 @@ def main():
             cv2.circle(image, (abs_x2, abs_y2), 5, (255, 0, 255), -1, cv2.LINE_AA)
             cv2.line(image, (abs_x1, abs_y1), (abs_x2, abs_y2), (255, 0, 255), 3)
 
-        # backboard[:frame_h, :frame_w] = image
-        # backboard[:frame_h, frame_w:] = cap_image
-        #
-        # out.write(backboard)
-        # cv2.imshow('image', backboard)
-        cv2.imshow('image', image)
-        cv2.imshow('cap_image', cap_image)
+        re_h, re_w, _ = re_img.shape
+        backboard[:frame_h, :frame_w] = image
+        backboard[:re_h, frame_w:frame_w + re_w] = re_img
 
+        # out.write(backboard)
+        cv2.imshow('image', backboard)
+
+        # cv2.imshow('image', image)
+        # cv2.imshow('cap_image', re_img)
 
         if cv2.waitKey(1) == 27:
             break
 
-    out.release()
     cap_cam.release()
     cv2.destroyAllWindows()
 

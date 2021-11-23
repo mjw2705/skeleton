@@ -13,7 +13,7 @@
 <img src="/image/selfie.jpg"  width="400" height="300">
 
 
-## Hand tracking으로 조절 기능 컨트롤 
+## Hand tracking 컨트롤 
 
 ### 볼륨 조절기
 
@@ -21,9 +21,14 @@
 
 <img src="/image/hand_volume.gif"  width="400" height="300">
 
-### 비디오 조절  
+### 비디오 재생 조절  
 
 [hand_video](https://github.com/mjw2705/skeleton/blob/master/hand_video.py)   
 
-<img src="/image/hand_video.gif"  width="600" height="300">
+<img src="/image/hand_video.gif"  width="650" height="300">
 
+### 이미지 크기 조절  
+
+[hand_image](https://github.com/mjw2705/skeleton/blob/master/hand_image.py)   
+
+[comment]: <> (<img src="/image/hand_image.gif"  width="600" height="300">)
