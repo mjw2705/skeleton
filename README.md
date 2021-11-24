@@ -31,4 +31,4 @@
 
 [hand_image](https://github.com/mjw2705/skeleton/blob/master/hand_image.py)   
 
-[comment]: <> (<img src="/image/hand_image.gif"  width="600" height="300">)
+<img src="/image/hand_image.gif"  width="750" height="450">

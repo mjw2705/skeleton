@@ -24,6 +24,14 @@ def hands(image):
     return None
 
 
+def finger_coor(hand_lms, frame_w, frame_h):
+    x1, y1 = hand_lms[4][0], hand_lms[4][1]
+    x2, y2 = hand_lms[8][0], hand_lms[8][1]
+    abs_x1, abs_y1, abs_x2, abs_y2 = int(x1 * frame_w), int(y1 * frame_h), int(x2 * frame_w), int(y2 * frame_h)
+
+    return abs_x1, abs_y1, abs_x2, abs_y2
+
+
 def main():
     frame_w = 512
     frame_h = 512
@@ -39,7 +47,12 @@ def main():
     cap_cam.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_h)
     cap_cam.set(cv2.CAP_PROP_FPS, 30)
 
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+    out = cv2.VideoWriter('hand_image.avi', fourcc, 30, (frame_w * 3, frame_h * 2))
+
     while cap_cam.isOpened():
+        backboard = np.zeros((frame_h * 2, frame_w * 3, 3), np.uint8)
+
         success, image = cap_cam.read()
         image = cv2.resize(image, (frame_w, frame_h))
         image = cv2.flip(image, 1)
@@ -48,19 +61,15 @@ def main():
             print("Ignoring empty camera frame.")
             continue
 
-        backboard = np.zeros((frame_h * 2, frame_w * 3, 3), np.uint8)
-
         hand_lms = hands(image)
 
         if hand_lms is not None:
-            x1, y1 = hand_lms[4][0], hand_lms[4][1]
-            x2, y2 = hand_lms[8][0], hand_lms[8][1]
-            abs_x1, abs_y1, abs_x2, abs_y2 = int(x1 * frame_w), int(y1 * frame_h), int(x2 * frame_w), int(y2 * frame_h)
+            abs_x1, abs_y1, abs_x2, abs_y2 = finger_coor(hand_lms, frame_w, frame_h)
 
             length = math.hypot(abs_x2 - abs_x1, abs_y2 - abs_y1)
 
-            # hand range 10 ~ 120
-            Per = np.interp(length, [10, 120], [0.1, 2])
+            # hand range 13 ~ 120
+            Per = np.interp(length, [13, 120], [0.1, 2])
             re_img = cv2.resize(cap_image, (int(frame_w * Per), int(frame_h * Per)), cv2.INTER_AREA)
         else:
             re_img = img_copy
@@ -82,7 +91,7 @@ def main():
         backboard[:frame_h, :frame_w] = image
         backboard[:re_h, frame_w:frame_w + re_w] = re_img
 
-        # out.write(backboard)
+        out.write(backboard)
         cv2.imshow('image', backboard)
 
         # cv2.imshow('image', image)
